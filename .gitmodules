@@ -1,0 +1,3 @@
+[submodule "bsc-sourcetransform"]
+	path = bsc-sourcetransform
+	url = https://github.com/giograno/bsc-sourcetransform
