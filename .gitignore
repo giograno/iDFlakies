@@ -4,3 +4,5 @@ target/
 .*.swp
 *.o
 *.hi
+idflakies.iml
+.idea
