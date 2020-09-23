@@ -11,9 +11,9 @@ import edu.illinois.cs.dt.tools.detection.DetectorUtil;
 import edu.illinois.cs.dt.tools.detection.filters.Filter;
 import edu.illinois.cs.dt.tools.runner.data.DependentTest;
 import edu.illinois.cs.dt.tools.runner.data.DependentTestList;
+import edu.illinois.cs.testrunner.configuration.Configuration;
 import edu.illinois.cs.testrunner.data.results.TestRunResult;
 import edu.illinois.cs.testrunner.runner.Runner;
-import edu.illinois.cs.testrunner.configuration.Configuration;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,19 +24,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class ExecutingDetector implements Detector, VerbosePrinter {
-    protected Runner runner;
-    private boolean countOnlyFirstFailure = Boolean.parseBoolean(Configuration.config().getProperty("dt.detector.count.only.first.failure", "false"));
-
-    protected int rounds;
-    private List<Filter> filters = new ArrayList<>();
     protected final String name;
     protected final AtomicInteger absoluteRound = new AtomicInteger(0);
-
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
+    protected Runner runner;
+    protected int rounds;
+    private final boolean countOnlyFirstFailure = Boolean.parseBoolean(Configuration.config().getProperty("dt.detector.count.only.first.failure", "false"));
+    private final List<Filter> filters = new ArrayList<>();
+    private final String CURRENT_ROUND = "iDFlakies-round";
 
     public ExecutingDetector(final Runner runner, final int rounds, final String name) {
         this.runner = runner;
@@ -98,13 +98,11 @@ public abstract class ExecutingDetector implements Detector, VerbosePrinter {
 
     private class RunnerIterator implements Iterator<DependentTest> {
         private final long origStartTimeMs = System.currentTimeMillis();
+        private final List<DependentTest> result = new ArrayList<>();
         private long startTimeMs = System.currentTimeMillis();
         private long previousStopTimeMs = System.currentTimeMillis();
-	private boolean roundsAreTotal = Boolean.parseBoolean(Configuration.config().getProperty("dt.detector.roundsemantics.total", "false"));
-
+        private final boolean roundsAreTotal = Boolean.parseBoolean(Configuration.config().getProperty("dt.detector.roundsemantics.total", "false"));
         private int i = 0;
-
-        private final List<DependentTest> result = new ArrayList<>();
 
         @Override
         public boolean hasNext() {
@@ -147,6 +145,7 @@ public abstract class ExecutingDetector implements Detector, VerbosePrinter {
         }
 
         public void generate() {
+            setCurrentRound();
             final DetectionRound round = generateDetectionRound();
 
             final double elapsed = previousStopTimeMs - startTimeMs;
@@ -157,20 +156,29 @@ public abstract class ExecutingDetector implements Detector, VerbosePrinter {
                 System.out.print(String.format("\r[INFO] Found %d tests in round %d of %d (%.1f seconds elapsed (%.1f total), %.1f seconds remaining).\n",
                         round.filteredTests().size(), ++i, rounds, elapsed / 1000, totalElapsed, estimate));
                 result.addAll(round.filteredTests().dts());
-		if (!roundsAreTotal){
-		    i = 0;
-		}
+                if (!roundsAreTotal) {
+                    i = 0;
+                }
                 startTimeMs = System.currentTimeMillis();
             } else {
-		if (roundsAreTotal)
-		    System.out.print(String.format("\r[INFO] Found %d tests in round %d of %d (%.1f seconds elapsed (%.1f total), %.1f seconds remaining).\n",
-						   round.filteredTests().size(), ++i, rounds, elapsed / 1000, totalElapsed, estimate));
-		else
-		    System.out.print(String.format("\r[INFO] Found %d tests in round %d of %d (%.1f seconds elapsed (%.1f total), %.1f seconds remaining).",
-						   round.filteredTests().size(), ++i, rounds, elapsed / 1000, totalElapsed, estimate));
+                if (roundsAreTotal)
+                    System.out.print(String.format("\r[INFO] Found %d tests in round %d of %d (%.1f seconds elapsed (%.1f total), %.1f seconds remaining).\n",
+                            round.filteredTests().size(), ++i, rounds, elapsed / 1000, totalElapsed, estimate));
+                else
+                    System.out.print(String.format("\r[INFO] Found %d tests in round %d of %d (%.1f seconds elapsed (%.1f total), %.1f seconds remaining).",
+                            round.filteredTests().size(), ++i, rounds, elapsed / 1000, totalElapsed, estimate));
             }
 
             absoluteRound.incrementAndGet();
+        }
+
+        /**
+         * Saves the info about the current round that can then be accessed by the performance scripts
+         */
+        private void setCurrentRound() {
+            System.out.print(String.format("Round set to $d", absoluteRound.get()));
+            Preferences prefs = Preferences.userRoot();
+            prefs.put(CURRENT_ROUND, Integer.toString(absoluteRound.get()));
         }
 
         @Override
