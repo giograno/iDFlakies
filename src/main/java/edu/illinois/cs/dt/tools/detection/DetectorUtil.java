@@ -15,9 +15,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class DetectorUtil {
+
+    /**
+     * Checks if tests in the original order pass. By default it retries for 3 times.
+     * @param originalOrder
+     * @param runner
+     * @return
+     */
     public static TestRunResult originalResults(final List<String> originalOrder, final Runner runner) {
         final int originalOrderTries = Configuration.config().getProperty("dt.detector.original_order.retry_count", 3);
         final boolean allMustPass = Configuration.config().getProperty("dt.detector.original_order.all_must_pass", true);
@@ -34,7 +40,9 @@ public class DetectorUtil {
             try {
                 Files.write(DetectorPathManager.originalResultsLog(), (origResult.id() + "\n").getBytes(),
                         Files.exists(DetectorPathManager.originalOrderPath()) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+                TestPluginPlugin.error(ignored);
+            }
 
             if (allPass(origResult)) {
                 allPassing = true;

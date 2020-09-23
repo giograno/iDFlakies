@@ -127,7 +127,7 @@ public class DetectorPlugin extends TestPlugin {
         }
 
         TestPluginPlugin.mojo().getLog().info("TIMEOUT_CALCULATED: Giving " + coordinates + " " + timeout + " seconds to run for " +
-            DetectorFactory.detectorType());
+                DetectorFactory.detectorType());
 
         return (long) timeout; // Allocate time proportionally
     }
@@ -159,20 +159,20 @@ public class DetectorPlugin extends TestPlugin {
                 final double mainTimeout = Configuration.config().getProperty("detector.timeout", 6 * 3600.0); // 6 hours
                 if (mainTimeout != 0) {
                     TestPluginPlugin.mojo().getLog().info("TIMEOUT_VALUE: Using a timeout of "
-                                                          + mainTimeout + ", and that the total mvn test time is: " + totalTime);
+                            + mainTimeout + ", and that the total mvn test time is: " + totalTime);
 
                     timeoutRounds = (int) (mainTimeout / totalTime);
                 } else {
                     timeoutRounds = roundNum;
                     TestPluginPlugin.mojo().getLog().info("TIMEOUT_VALUE specified as 0. " +
-                                                          "Ignoring timeout and using number of rounds.");
+                            "Ignoring timeout and using number of rounds.");
                 }
             } else {
                 // Depending on the order in which the developers tell Maven to build modules, some projects like http-request
                 // may not be able to parse the mvn-test-time.log at the base module if other submodules are built first
                 timeoutRounds = roundNum;
                 TestPluginPlugin.mojo().getLog().info("TIMEOUT_VALUE specified but cannot " +
-                                                      "read mvn-test-time.log at: " + timeCsv.toString());
+                        "read mvn-test-time.log at: " + timeCsv.toString());
                 TestPluginPlugin.mojo().getLog().info("Ignoring timeout and using number of rounds.");
             }
         } else {
@@ -201,6 +201,9 @@ public class DetectorPlugin extends TestPlugin {
         logger.runAndLogError(() -> detectorExecute(logger, mavenProject, moduleRounds(coordinates)));
     }
 
+    /**
+     * first method called after execute
+     */
     private Void detectorExecute(final ErrorLogger logger, final MavenProject mavenProject, final int rounds) throws IOException {
         Files.deleteIfExists(DetectorPathManager.errorPath());
         Files.createDirectories(DetectorPathManager.cachePath());
@@ -216,6 +219,7 @@ public class DetectorPlugin extends TestPlugin {
                 this.runner = InstrumentingSmartRunner.fromRunner(runnerOption.get());
             }
 
+            // detect original order from surefire plugin
             final List<String> tests = getOriginalOrder(mavenProject);
 
             // If there are no tests, we can't run a flaky test detector
@@ -245,30 +249,41 @@ public class DetectorPlugin extends TestPlugin {
         return getOriginalOrder(mavenProject, false);
     }
 
-    public static List<String> getOriginalOrder(final MavenProject mavenProject, boolean ignoreExisting) throws IOException {
+    /**
+     * Gets the original order of the executed tests by parsing the surefire logs
+     *
+     * @param mavenProject
+     * @param ignoreExisting
+     * @return
+     * @throws IOException
+     */
+    public static List<String> getOriginalOrder(final MavenProject mavenProject,
+                                                boolean ignoreExisting) throws IOException {
         if (!Files.exists(DetectorPathManager.originalOrderPath()) || ignoreExisting) {
-            TestPluginPlugin.mojo().getLog().info("Getting original order by parsing logs. ignoreExisting set to: " + ignoreExisting);
+            TestPluginPlugin.mojo().getLog().info("Getting original order by parsing logs. " +
+                    "ignoreExisting set to: " + ignoreExisting);
 
             try {
-                final Path surefireReportsPath = Paths.get(mavenProject.getBuild().getDirectory()).resolve("surefire-reports");
+                final Path surefireReportsPath = Paths.get(mavenProject.getBuild().getDirectory())
+                        .resolve("surefire-reports");
                 final Path mvnTestLog = DetectorPathManager.mvnTestLog();
 
                 if (Files.exists(mvnTestLog) && Files.exists(surefireReportsPath)) {
-                    final List<TestClassData> testClassData = new GetMavenTestOrder(surefireReportsPath, mvnTestLog).testClassDataList();
+                    final List<TestClassData> testClassData = new GetMavenTestOrder(surefireReportsPath, mvnTestLog)
+                            .testClassDataList();
 
                     final List<String> tests = new ArrayList<>();
 
-                    for (final TestClassData classData : testClassData) {
-                        for (final String testName : classData.testNames) {
+                    for (final TestClassData classData : testClassData)
+                        for (final String testName : classData.testNames)
                             tests.add(classData.className + "." + testName);
-                        }
-                    }
 
                     return tests;
                 } else {
                     return JavaConverters.bufferAsJavaList(TestLocator.tests(mavenProject).toBuffer());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             return JavaConverters.bufferAsJavaList(TestLocator.tests(mavenProject).toBuffer());
         } else {
