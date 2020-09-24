@@ -21,7 +21,8 @@ slug=$1
 rounds=$2
 timeout=$3
 
-iDFlakiesVersion=1.0.2-SNAPSHOT
+# local version supporting changes for performance measurements
+iDFlakiesVersion=1.0.3-SNAPSHOT
 
 # Setup prolog stuff
 cd "/home/$SCRIPT_USERNAME/$TOOL_REPO/scripts/"
@@ -29,7 +30,12 @@ cd "/home/$SCRIPT_USERNAME/$TOOL_REPO/scripts/"
 
 # Incorporate tooling into the project, using Java XML parsing
 cd "/home/$SCRIPT_USERNAME/${slug}"
+commit_hash=$(git rev-parse HEAD)
 /home/$SCRIPT_USERNAME/$TOOL_REPO/pom-modify/modify-project.sh . $iDFlakiesVersion
+
+echo "*******************PERFORMANCE INJECTION************************"
+echo "Running performance_injection.sh"
+su - "$SCRIPT_USERNAME" -c "/home/$SCRIPT_USERNAME/$TOOL_REPO/pom-modify/performance_injection.sh $slug $commit_hash"
 
 # Run the plugin, get module test times
 echo "*******************REED************************"
@@ -96,6 +102,8 @@ timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testp
 RESULTSDIR=/home/$SCRIPT_USERNAME/output/
 mkdir -p ${RESULTSDIR}
 /home/$SCRIPT_USERNAME/$TOOL_REPO/scripts/gather-results $(pwd) ${RESULTSDIR}
+# Moving the performance results too
+mv mes.txt ${RESULTSDIR}/
 mv *.log ${RESULTSDIR}/
 
 echo "*******************REED************************"
