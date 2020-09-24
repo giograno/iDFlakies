@@ -11,7 +11,7 @@ commit_hash=$2
 
 PROJECT_DIR="/home/$SCRIPT_USERNAME/${slug}"
 
-java -jar /home/$SCRIPT_USERNAME/$TOOL_REPO/BSC_TRANSFORM/target/bsc-sourcetransform-0.0.1-jar-with-dependencies.jar $PROJECT_DIR $PROJECT_DIR $slug-math $commit_hash
+java -jar /home/$SCRIPT_USERNAME/$TOOL_REPO/BSC_TRANSFORM/target/bsc-sourcetransform-0.0.1-jar-with-dependencies.jar $PROJECT_DIR $PROJECT_DIR/mes.txt $slug-math $commit_hash
 
 if [ $? -eq 0 ]
 then
