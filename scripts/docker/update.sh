@@ -11,4 +11,4 @@ cd /home/$SCRIPT_USERNAME/$TOOL_REPO/ && git pull && /home/$SCRIPT_USERNAME/apac
 
 # Fetches the module that changes the code for the performances and builds it
 cd /home/$SCRIPT_USERNAME/$TOOL_REPO/ && git submodule update --init --recursive
-cd /home/$SCRIPT_USERNAME/$TOOL_REPO/BSC_TRANSFORM && /home/$SCRIPT_USERNAME/apache-maven/bin/mvn clean package
+cd /home/$SCRIPT_USERNAME/$TOOL_REPO/$BSC_TRANSFORM && /home/$SCRIPT_USERNAME/apache-maven/bin/mvn clean package
