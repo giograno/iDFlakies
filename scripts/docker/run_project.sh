@@ -34,7 +34,7 @@ commit_hash=$(git rev-parse HEAD)
 
 echo "*******************PERFORMANCE INJECTION************************"
 echo "Running performance_injection.sh"
-su - "$SCRIPT_USERNAME" -c "/home/$SCRIPT_USERNAME/$TOOL_REPO/pom-modify/performance_injection.sh $slug $commit_hash"
+/home/$SCRIPT_USERNAME/$TOOL_REPO/scripts/docker/performance_injection.sh $slug $commit_hash
 
 # Run the plugin, get module test times
 echo "*******************iDFLAKIES************************"
