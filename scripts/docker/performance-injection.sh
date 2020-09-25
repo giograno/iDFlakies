@@ -4,6 +4,8 @@ SCRIPT_USERNAME="idflakies"
 TOOL_REPO="iDFlakies"
 BSC_TRANSFORM="bsc-sourcetransform"
 
+echo "Running the performance injection modification"
+
 script_to_run="/home/$SCRIPT_USERNAME/$TOOL_REPO/scripts/docker/performance_injection.sh"
 
 slug=$1
