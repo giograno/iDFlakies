@@ -33,9 +33,9 @@ echo "Making tooling image"
 date
 
 # Create tooling Docker image if does not exist
-docker inspect toolingdetectorbase:latest > /dev/null 2>&1
+docker inspect toolingdetectorperfbase:latest > /dev/null 2>&1
 if  [ $?  == 1 ]; then
-    docker build -t toolingdetectorbase:latest - < toolingDockerfile
+    docker build -t toolingdetectorperfbase:latest - < toolingPerfDockerfile
 fi
 
 # For each project,sha, make a Docker image for it
