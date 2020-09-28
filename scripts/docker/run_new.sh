@@ -9,7 +9,7 @@ do
     slug=$(echo $(cat ${entry}) | cut -d',' -f1 | rev | cut -d'/' -f1-2 | rev)
     echo "Computing: $slug"
     outFile=$(echo ${slug} | tr / .)
-    nohup bash create_and_run_dockers.sh $entry $rounds $maxTime > $outFile.out 2>&1 &
+    sudo nohup bash create_and_run_dockers.sh $entry $rounds $maxTime > $outFile.out 2>&1 &
   else
     continue
   fi
