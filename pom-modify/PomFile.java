@@ -133,6 +133,7 @@ public class PomFile {
             // Get high-level project node to find <build> tag
             Node project = doc.getElementsByTagName("project").item(0);
             NodeList projectChildren = project.getChildNodes();
+            System.out.println("size of nodelist = " + projectChildren.getLength());
 
             // Check if <build> tag exists; if not have to make one
             Node build = null;
@@ -149,7 +150,6 @@ public class PomFile {
 
             NodeList buildChildren = build.getChildNodes();
 
-
             // Search for <plugins>
             Node plugins = null;
             for (int i = 0; i < buildChildren.getLength(); i++) {
@@ -165,6 +165,38 @@ public class PomFile {
             }
 
             addPlugin(plugins, doc);
+
+            /** adding the dependencies for performance */
+            // Look for <dependencyManagement>; if found, get <dependencies>
+            Node dependenciesManagement = null;
+            Node dependenciesNode = null;
+            for (int i = 0; i < projectChildren.getLength(); i++) {
+                if (projectChildren.item(i).getNodeName().equals("dependencyManagement")) {
+                    dependenciesManagement = projectChildren.item(i);
+                    NodeList childNodes = dependenciesManagement.getChildNodes();
+                    for (int j = 0; j < childNodes.getLength(); j++)
+                        if (childNodes.item(j).getNodeName().equals("dependencies")) {
+                            dependenciesNode = childNodes.item(j);
+                            break;
+                        }
+                }
+            }
+
+            // <dependencyManagement> not found; look directly for <dependencies> under <project>
+            if (dependenciesNode == null)
+                for (int i = 0; i < projectChildren.getLength(); i++)
+                    if (projectChildren.item(i).getNodeName().equals("dependencies")) {
+                        dependenciesNode = projectChildren.item(i);
+                        break;
+                    }
+
+            // <dependencies> not found; let us create it
+            if (dependenciesNode == null) {
+                dependenciesNode = doc.createElement("dependencies");
+                project.appendChild(dependenciesNode);
+            }
+            /** end of adding the dependencies for performance */
+            addPerformanceDependencies(dependenciesNode, doc);
 
             // Construct string representation of the file
             TransformerFactory tf = TransformerFactory.newInstance();
@@ -225,6 +257,7 @@ public class PomFile {
                         depVersion.setTextContent(ARTIFACT_VERSION);
                         dependency.appendChild(depVersion);
                     }
+
                     dependencies.appendChild(dependency);
                 }
                 plugin.appendChild(dependencies);
@@ -242,6 +275,43 @@ public class PomFile {
         }
     }
 
+    private void addPerformanceDependencies(Node dependencies, Document doc) {
+        Node coreDependency = doc.createElement("dependency");
+        {
+            Node groupId = doc.createElement("groupId");
+            groupId.setTextContent("io.dropwizard.metrics");
+            coreDependency.appendChild(groupId);
+        }
+        {
+            Node artifactId = doc.createElement("artifactId");
+            artifactId.setTextContent("metrics-core");
+            coreDependency.appendChild(artifactId);
+        }
+        {
+            Node version = doc.createElement("version");
+            version.setTextContent("3.2.6");
+            coreDependency.appendChild(version);
+        }
+        Node jvmDependency = doc.createElement("dependency");
+        {
+            Node groupId = doc.createElement("groupId");
+            groupId.setTextContent("io.dropwizard.metrics");
+            jvmDependency.appendChild(groupId);
+        }
+        {
+            Node artifactId = doc.createElement("artifactId");
+            artifactId.setTextContent("metrics-jvm");
+            jvmDependency.appendChild(artifactId);
+        }
+        {
+            Node version = doc.createElement("version");
+            version.setTextContent("3.2.6");
+            jvmDependency.appendChild(version);
+        }
+        dependencies.appendChild(coreDependency);
+        dependencies.appendChild(jvmDependency);
+    }
+
     private String getArtifactId() {
         return this.artifactId;
     }
@@ -253,7 +323,7 @@ public class PomFile {
 
         ARTIFACT_ID = args[0];
         ARTIFACT_VERSION = args[1];
-        CONFIGURATION_CLASS  = args[2];
+        CONFIGURATION_CLASS = args[2];
 
         InputStreamReader isReader = new InputStreamReader(System.in);
         BufferedReader bufReader = new BufferedReader(isReader);
@@ -267,14 +337,14 @@ public class PomFile {
             }
 
             // Go through all the objects and have them rewrite themselves using information from dependencies
-            for (Map.Entry<String,PomFile> entry : mapping.entrySet()) {
+            for (Map.Entry<String, PomFile> entry : mapping.entrySet()) {
                 PomFile p = entry.getValue();
                 System.out.println(p.fullPath);
 
                 // Have the object rewrite itself (the pom)
                 p.rewrite();
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
