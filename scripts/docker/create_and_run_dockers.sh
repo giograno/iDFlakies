@@ -16,6 +16,8 @@ rounds=$2
 timeout=$3
 script="$4"
 
+echo "Running on ${projfile}"
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 echo "*******************IDFLAKIES DEBUG************************"
