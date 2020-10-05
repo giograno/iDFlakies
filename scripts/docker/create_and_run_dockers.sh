@@ -63,6 +63,7 @@ for line in $(cat ${projfile}); do
     else
         docker run -t --memory="40g" --cpus="6" --rm -v ${SCRIPT_DIR}:/Scratch ${image} /bin/bash -x /Scratch/run_experiment.sh ${slug} ${rounds} ${timeout} "${script}"
         docker image rm ${image}
+        docker system prune -a -f --volumes
     fi
 done
 
