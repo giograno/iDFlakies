@@ -44,7 +44,7 @@ date
 modifiedslug=$(echo ${slug} | sed 's;/;.;' | tr '[:upper:]' '[:lower:]')
 
 # Set global mvn options for skipping things
-MVNOPTIONS="-Denforcer.skip=true -Drat.skip=true -Dmdep.analyze.skip=true -Dmaven.javadoc.skip=true -Drat.skip=true "
+MVNOPTIONS="-Denforcer.skip=true -Drat.skip=true -Dmdep.analyze.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true"
 IDF_OPTIONS="-Ddt.detector.original_order.all_must_pass=false -Ddetector.timeout=${timeout} -Ddt.randomize.rounds=${rounds} -fn -B -e -Ddt.cache.absolute.path=/Scratch/all-output/${modifiedslug}_output"
 
 # Optional timeout... In practice our tools really shouldn't need 1hr to parse a project's surefire reports.
