@@ -1,5 +1,5 @@
 #!/bin/bash
-maxTime="1000000"
+maxTime="100000"
 rounds="20"
 csvDir="icst-dataset/comprehensive-individual-split"
 noJobs=10

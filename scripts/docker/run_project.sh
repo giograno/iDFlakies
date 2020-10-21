@@ -51,25 +51,25 @@ IDF_OPTIONS="-Ddt.detector.original_order.all_must_pass=false -Ddetector.timeout
 timeout 1h /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} -Dtestplugin.className=edu.illinois.cs.dt.tools.utility.ModuleTestTimePlugin -fn -B -e -Ddt.cache.absolute.path=/Scratch/all-output/${modifiedslug}_output |& tee module_test_time.log
 
 # Run the plugin, reversing the original order (reverse class and methods)
-echo "*******************iDFLAKIES************************"
-echo "Running testplugin for reversing the original order"
-date
-
-timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=reverse |& tee reverse_original.log
+#echo "*******************iDFLAKIES************************"
+#echo "Running testplugin for reversing the original order"
+#date
+#
+#timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=reverse |& tee reverse_original.log
 
 # Run the plugin, reversing the original order (reverse class)
-echo "*******************iDFLAKIES************************"
-echo "Running testplugin for reversing the class order"
-date
-
-timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=reverse-class |& tee reverse_class.log
+#echo "*******************iDFLAKIES************************"
+#echo "Running testplugin for reversing the class order"
+#date
+#
+#timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=reverse-class |& tee reverse_class.log
 
 # Run the plugin, original order
-echo "*******************iDFLAKIES************************"
-echo "Running testplugin for original"
-date
-
-timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=original |& tee original.log
+#echo "*******************iDFLAKIES************************"
+#echo "Running testplugin for original"
+#date
+#
+#timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=original |& tee original.log
 
 # Run the plugin, random class first, method second
 echo "*******************iDFLAKIES************************"
@@ -79,11 +79,11 @@ date
 timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} |& tee random_class_method.log
 
 # Run the plugin, random class only
-echo "*******************iDFLAKIES************************"
-echo "Running testplugin for randomize classes"
-date
-
-timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=random-class |& tee random_class.log
+#echo "*******************iDFLAKIES************************"
+#echo "Running testplugin for randomize classes"
+#date
+#
+#timeout ${timeout}s /home/$SCRIPT_USERNAME/apache-maven/bin/mvn testrunner:testplugin ${MVNOPTIONS} ${IDF_OPTIONS} -Ddetector.detector_type=random-class |& tee random_class.log
 
 ## Run the smart-shuffle (every test runs first and last)
 #echo "*******************iDFLAKIES************************"
